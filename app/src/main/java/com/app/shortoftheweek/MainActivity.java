@@ -17,6 +17,7 @@ import android.widget.Toast;
 /* App imports */
 
 /* Vimeo Imports */
+import com.app.shortoftheweek.databinding.ActivityMainBinding;
 import com.app.shortoftheweek.models.VideoModel;
 import com.vimeo.networking.*;
 import com.vimeo.networking.callbacks.ModelCallback;
@@ -28,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -37,22 +39,20 @@ public class MainActivity extends Activity implements OnClickListener {
     private VimeoClient mApiClient = VimeoClient.getInstance();
     // private ProgressDialog mProgressDialog;
 
-    private TextView mRequestOutputTv;
 
     ArrayList<VideoModel> myFilms = new ArrayList<>();
 //    ArrayList<Video> myTest = new ArrayList<>();
+    // HashMap<String, String> cortFilm = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /* ---- View Binding ---- */
-        mRequestOutputTv = (TextView) findViewById(R.id.request_output_tv);
-        findViewById(R.id.fetch_videos).setOnClickListener(this);
+        ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding.setVideos(myFilms);
+        fetchShorts();
     }
-
-
 
     @Override
     public void onClick(View view) {
@@ -72,7 +72,6 @@ public class MainActivity extends Activity implements OnClickListener {
             }
             addNewLine = true;
             videoTitlesString += video.name;
-            mRequestOutputTv.setText(videoTitlesString);
         }
     }
 
@@ -83,8 +82,9 @@ public class MainActivity extends Activity implements OnClickListener {
             @Override
             public void success(VideoList videoList) {
                 if (videoList != null && videoList.data != null) {
-
+                    myFilms.clear();
                     for (Video video : videoList.data) {
+
                         VideoModel model = new VideoModel();
                         model.setTitle(video.name);
                         model.setLanguage(video.language);
@@ -97,7 +97,6 @@ public class MainActivity extends Activity implements OnClickListener {
             @Override
             public void failure(VimeoError error) {
                 toast("Staff Picks Failure");
-                mRequestOutputTv.setText(error.getDeveloperMessage());
             }
         });
 
